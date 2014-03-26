@@ -8,32 +8,47 @@ D&amp;D 3.5 Database Query Tool
 
 REQUIRES PYTHON 2.7
 
-Python Module Dependencies:
------------------------------
+---Python Module Dependencies---
+
 numpy
+
 pandas
+
 lxml
+
 Beautiful Soup 4
+
 numexpr
+
 cython
 
 
-Just to be safe, get these:
------------------------------
+---Just to be safe, get these---
+
 GDAL
+
 matplotlib
+
 pyparsing
+
 python-dateutil
+
 pytz
+
 scipy
+
 six
+
 pytables
 
-Recommended modules for development:
------------------------------
+---Recommended modules for development---
+
 ipython --(replace python shell)
+
 pip --(install modules from command line)
+
 setuptools --(alternative to pip)
+
 
 
 \\\\\\\\\\RUNNING THE SCRIPT\\\\\\\\\\\
