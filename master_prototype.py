@@ -72,7 +72,7 @@ def get_spell(i):
 	print f['dnd_spellschool']['name'].ix[f['dnd_spell']['school_id'].ix[i]]
 	print '\n'
 	'''if f['dnd_spell']['sub_school_id'].ix[i] == 'NaN':
-		print 'no subschool'
+		pass
 	else:
 		print f['dnd_spellsubschool']['name'].ix[f['dnd_spell']['sub_school_id'].ix[i]]'''
 	if f['dnd_spell']['classlv_dict'].ix[i] == 0:
@@ -103,6 +103,8 @@ def get_spell(i):
 	print '\n'
 	print f['dnd_spell']['description'].ix[i]
 
+#Warning: inconsistent indexing; should be redone.
+
 def get_characlass(i):
 	print '\n'
 	print f['dnd_characterclass']['name'].ix[f['dnd_characterclassvariant']['character_class_id'].ix[i]]
@@ -118,7 +120,7 @@ def get_characlass(i):
 	#print "Races: "
 	#print "Other Classes: "
 	#print "Role: "
-	print "Hit Die:  d" + f['dnd_characterclassvariant']['hit_die'].ix[i]
+	print "Hit Die:  d", f['dnd_characterclassvariant']['hit_die'].ix[i]
 	print "Skill Points: ", f['dnd_characterclassvariant']['skill_points'].ix[i]
 	print "Class Skills"
 	print '\n'
@@ -288,4 +290,50 @@ def get_deity(i):
 	"Alignment"
 	"Description"
 
+#PROTOTYPE SORTING ALGORITHM; lists spells for a given class.
 
+def spell_by_class(c):
+	sp_cl = []
+	for i in f['dnd_spell'].index:
+		cell = ast.literal_eval(f['dnd_spell']['classlv_dict'].ix[i])
+		if cell != 0:
+			cell = dict(cell)
+			for key in cell.iterkeys():
+				if key == c:
+					sp_cl.append(i)
+			else:
+				continue
+	return f['dnd_spell']['name'].ix[sp_cl]
+
+#PROTOTYPE; MAY BE BUGGY; Displays all spells and class levels for a particular class.
+
+def spell_by_class_lv(c):
+	sp_cv = []
+	sp_lv = []
+	for i in f['dnd_spell'].index:
+		cell = ast.literal_eval(f['dnd_spell']['classlv_dict'].ix[i])
+		if cell != 0:
+			cell = dict(cell)
+			for key, value in cell.iteritems():
+				if key == c:
+					sp_cv.append(i)
+					sp_lv.append(value)
+			else:
+				continue
+	temp_name = f['dnd_spell']['name'].ix[sp_cv]
+	temp_lv = pd.Series(sp_lv, index=sp_cv)
+	output =  pd.concat([temp_name, temp_lv], axis=1)
+	output.columns = ('Name', 'Class Level')
+	print f['dnd_characterclass']['name'].ix[c], "Spells"
+	return output.sort(columns='Class Level', ascending=True)
+
+'''def sp_filter_bool(tf):
+	if tf == True:
+		return True
+	else:
+		return False
+	filter_list = []
+	if filter_cla = True
+		fi_li.append(output['class'] == cla)
+
+#df[(df.A == 1) & (df.D == 6)]'''
