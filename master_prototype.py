@@ -5,6 +5,7 @@ import pandas as pd
 import sqlite3
 import ast
 import html5lib
+import os
 
 #Connect to database in current directory (database must be downloaded elsewhere and placed in current directory)
 
@@ -290,6 +291,13 @@ def get_deity(i):
 	"Alignment"
 	"Description"
 
+sp_filter_bool = False
+cl_filter_bool = False
+ft_filter_bool = False
+rc_filter_bool = False
+sk_filter_bool = False
+it_filter_bool = False
+
 #PROTOTYPE SORTING ALGORITHM; lists spells for a given class.
 
 def spell_by_class(c):
@@ -327,13 +335,302 @@ def spell_by_class_lv(c):
 	print f['dnd_characterclass']['name'].ix[c], "Spells"
 	return output.sort(columns='Class Level', ascending=True)
 
-'''def sp_filter_bool(tf):
-	if tf == True:
-		return True
-	else:
-		return False
-	filter_list = []
-	if filter_cla = True
-		fi_li.append(output['class'] == cla)
+#df[(df.A == 1) & (df.D == 6)]
 
-#df[(df.A == 1) & (df.D == 6)]'''
+sp_filter_dict = {
+'rulebook_id' : 52,
+'class' : 2,
+'domain' : 1,
+'classlevel' : -9999,
+'domlevel' : -9999,
+'effect' : -9999,
+'school_id' : 1,
+'sub_school_id' : -9999,
+'casting_time' : -9999,
+'range' : -9999,
+'components' : -9999,
+'saving_throw' : -9999,
+'descriptor' : -9999,
+'spell_resistance' : -9999,
+'description' : -9999}
+ 
+sp_filter_dict = {
+'rulebook_id' : 52,
+'class' : 2,
+'domain' : -9999,
+'classlevel' : -9999,
+'domlevel' : -9999,
+'effect' : 'mobile',
+'school_id' : 1,
+'subschool_id' : -9999}
+
+'''cl_filter_dict = {
+ 'book' : -9999
+ 'class_features' : -9999,
+ 'advancement': -9999,
+ 'prestige_class': -9999,
+ 'hit dice': -9999}
+ 
+ ft_filter_dict = {
+ 'book' : -9999
+ 'benefit': -9999,
+ 'category': -9999}
+ 
+ rc_filter_dict = {
+ 'book': -9999,
+ 'size': -9999,
+ 'modifies attr': -9999
+ 'level adj': -9999}
+ 
+ sk_filter_dict = {
+ 'book': -9999
+ 'benefit': -9999
+ 'ability check': -9999
+ 'trained only': -9999
+ 'armor check': -9999}
+ 
+ it_filter_dict = {
+ 'book': -9999
+ 'caster level': -9999
+ 'item level': -9999
+ 'body slot': -9999
+ 'property': -9999
+ 'activation type': -9999
+ 'item type': -9999}'''
+
+#Filter outer: any criteria must be satisfied
+
+def make_sp_filter_outer(**kwargs):
+	df = f['dnd_spell']
+	ix_li = []
+	if kwargs['rulebook_id'] == -9999:
+		pass
+	else:
+		ix_li.extend(list((df.ix[df['rulebook_id'] == kwargs['rulebook_id']].index)))
+	if kwargs['class'] == -9999:
+		pass
+	else:
+		for i in df.index:
+			cell = ast.literal_eval(df['classlv_dict'].ix[i])
+			if cell != 0:
+				#cell = dict(cell)
+				for key in cell.iterkeys():
+					if key == kwargs['class']:
+						ix_li.append(i)	
+	if kwargs['domain'] == -9999:
+		pass
+	else:
+		for j in df.index:
+			cell = ast.literal_eval(df['domlv_dict'].ix[j])
+			if cell != 0:
+				#cell = dict(cell)
+				for key in cell.iterkeys():
+					if key == kwargs['domain']:
+						ix_li.append(j)
+	if kwargs['classlevel'] == -9999:
+		pass
+	else:
+		for k in df.index:
+			cell = ast.literal_eval(df['classlv_dict'].ix[k])
+			if cell != 0:
+				#cell = dict(cell)
+				for value in cell.itervalues():
+					if value == kwargs['classlevel']:
+						ix_li.append(k)
+	if kwargs['domlevel'] == -9999:
+		pass
+	else:
+		for l in df.index:
+			cell = ast.literal_eval(df['domlv_dict'].ix[l])
+			if cell != 0:
+				#cell = dict(cell)
+				for value in cell.itervalues():
+					if value == kwargs['domlevel']:
+						ix_li.append(l)
+	if kwargs['effect'] == -9999:
+		pass
+	else:		
+		for index, row in df.iterrows():
+			if kwargs['effect'].lower() in str(row['effect']).lower():
+				ix_li.append(index)
+	if kwargs['school_id'] == -9999:
+		pass
+	else:
+		ix_li.extend(list((df.ix[df['school_id'] == kwargs['school_id']].index)))
+	if kwargs['sub_school_id'] == -9999:
+		pass
+	else:
+		ix_li.extend(list((df.ix[df['sub_school_id'] == kwargs['sub_school_id']].index)))
+	if kwargs['casting_time'] == -9999:
+		pass
+	else:
+		ix_li.extend(list((df.ix[df['casting_time'] == kwargs['casting_time']].index)))
+	if kwargs['range'] == -9999:
+		pass
+	else:
+		ix_li.extend(list((df.ix[df['range'] == kwargs['range']].index)))
+	if kwargs['components'] == -9999:
+		pass
+	else:
+		ix_li.extend(list((df.ix[df['range'] == kwargs['range']].index)))
+	if kwargs['saving_throw'] == -9999:
+		pass
+	else:
+		for index, row in df.iterrows():
+			if kwargs['saving_throw'].lower() in str(row['saving_throw']).lower():
+				ix_li.append(index)
+	if kwargs['descriptor'] == -9999:
+		pass
+	else:
+		ix_li.extend(list((df.ix[df['descriptor'] == kwargs['descriptor']].index)))
+	if kwargs['spell_resistance'] == -9999:
+		pass
+	else:
+		for index, row in df.iterrows():
+			if kwargs['spell_resistance'].lower() in str(row['spell_resistance']).lower():
+				ix_li.append(index)
+	if kwargs['description'] == -9999:
+		pass
+	else:
+		for index, row in df.iterrows():
+			if kwargs['description'].lower() in str(row['description']).lower():
+				ix_li.append(index)				
+	return df.ix[list(set(ix_li))]
+
+
+# Filter inner: all criteria must be satisfied. NOT FINISHED
+
+def make_sp_filter_inner(**kwargs):
+	df = f['dnd_spell']
+	s = pd.Series(df.index)
+	d = {'id' : s}
+	ix_li = pd.DataFrame(d)
+	#print ix_li
+	if kwargs['rulebook_id'] == -9999:
+		pass
+	else:
+		temp_ix = pd.Series(df.ix[df['rulebook_id'] == kwargs['rulebook_id']].index)
+		ix_li = ix_li.join(temp_ix, how='inner', lsuffix='l', rsuffix='r')
+		ix_li.columns = ('id', 'temp')
+		del ix_li['temp']
+		#print ix_li
+	if kwargs['class'] == -9999:
+		pass
+	else:
+		temp_li = []
+		for i in df.index:			
+			cell = ast.literal_eval(df['classlv_dict'].ix[i])
+			if cell != 0:
+				#cell = dict(cell)
+				for key in cell.iterkeys():
+					if key == kwargs['class']:
+						temp_li.append(i)
+		temp_s = pd.Series(temp_li)
+		d_t = {'temp' : temp_s}
+		temp_ix = pd.DataFrame(d_t, index=temp_li)
+		ix_li = ix_li.join(temp_ix, how='inner')
+		del ix_li['temp']
+		#print df['classlv_dict'].ix[ix_li.index]
+	if kwargs['domain'] == -9999:
+		pass
+	else:
+		temp_li = []
+		for j in df.index:
+			cell = ast.literal_eval(df['domlv_dict'].ix[j])
+			if cell != 0:
+				#cell = dict(cell)
+				for key in cell.iterkeys():
+					if key == kwargs['domain']:
+						temp_li.append(j)
+		temp_s = pd.Series(temp_li)
+		d_t = {'temp' : temp_s}
+		temp_ix = pd.DataFrame(d_t, index=temp_li)
+		ix_li = ix_li.join(temp_ix, how='inner')
+		del ix_li['temp']
+		print ix_li
+		#print df['domlv_dict'].ix[ix_li.index]
+	if kwargs['classlevel'] == -9999:
+		pass
+	else:
+		for k in df.index:
+			cell = ast.literal_eval(df['classlv_dict'].ix[k])
+			if cell != 0:
+				#cell = dict(cell)
+				for value in cell.itervalues():
+					if value == kwargs['classlevel']:
+						ix_li.append(k)
+	if kwargs['domlevel'] == -9999:
+		pass
+	else:
+		for l in df.index:
+			cell = ast.literal_eval(df['domlv_dict'].ix[l])
+			if cell != 0:
+				#cell = dict(cell)
+				for value in cell.itervalues():
+					if value == kwargs['domlevel']:
+						ix_li.append(l)
+	if kwargs['effect'] == -9999:
+		pass
+	else:		
+		for index, row in df.iterrows():
+			if kwargs['effect'].lower() in str(row['effect']).lower():
+				ix_li.append(index)
+	if kwargs['school_id'] == -9999:
+		pass
+	else:
+		temp_s = pd.Series(df.ix[df['school_id'] == kwargs['school_id']].index)
+		print temp_ix
+		d = {'temp': temp_s}
+		temp_ix = pd.DataFrame(d, index=temp_s)
+		print temp_ix
+		ix_li = ix_li.join(temp_ix, how='inner')
+		ix_li.columns = ('id', 'temp')
+		del ix_li['temp']
+		print df['school_id'].ix[ix_li.index]
+	if kwargs['sub_school_id'] == -9999:
+		pass
+	else:
+		temp_s = pd.Series(df.ix[df['sub_school_id'] == kwargs['sub_school_id']].index)
+		ix_li = ix_li.join(temp_ix, how='inner')
+		ix_li.columns = ('id', 'temp')
+		del ix_li['temp']
+		#print ix_li
+	if kwargs['casting_time'] == -9999:
+		pass
+	else:
+		ix_li.extend(list((df.ix[df['casting_time'] == kwargs['casting_time']].index)))
+	if kwargs['range'] == -9999:
+		pass
+	else:
+		ix_li.extend(list((df.ix[df['range'] == kwargs['range']].index)))
+	if kwargs['components'] == -9999:
+		pass
+	else:
+		ix_li.extend(list((df.ix[df['range'] == kwargs['range']].index)))
+	if kwargs['saving_throw'] == -9999:
+		pass
+	else:
+		for index, row in df.iterrows():
+			if kwargs['saving_throw'].lower() in str(row['saving_throw']).lower():
+				ix_li.append(index)
+	if kwargs['descriptor'] == -9999:
+		pass
+	else:
+		ix_li.extend(list((df.ix[df['descriptor'] == kwargs['descriptor']].index)))
+	if kwargs['spell_resistance'] == -9999:
+		pass
+	else:
+		for index, row in df.iterrows():
+			if kwargs['spell_resistance'].lower() in str(row['spell_resistance']).lower():
+				ix_li.append(index)
+	if kwargs['description'] == -9999:
+		pass
+	else:
+		for index, row in df.iterrows():
+			if kwargs['description'].lower() in str(row['description']).lower():
+				ix_li.append(index)				
+	return df.ix[ix_li.index]
+
+def apply_sp_filter(df, *args):
+	sp_filter_bool = True
+	return[(np.logical_and(*args))]
